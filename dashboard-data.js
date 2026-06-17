@@ -1,5 +1,5 @@
 window.DASHBOARD_DATA = {
-  "generatedAt": "2026-06-17T00:18:47.424Z",
+  "generatedAt": "2026-06-17T02:12:57.132Z",
   "periods": {
     "month": {
       "label": "今月",
@@ -8,35 +8,31 @@ window.DASHBOARD_DATA = {
       "rows": [
         {
           "name": "田井さん",
+          "oneToOne": 4,
+          "referral": 2,
           "valid": 5,
-          "second": 3,
-          "won": 2,
-          "largeWon": 2,
-          "wonAmount": 2700000
+          "second": 3
         },
         {
           "name": "脇本さん",
+          "oneToOne": 3,
+          "referral": 2,
           "valid": 3,
-          "second": 2,
-          "won": 2,
-          "largeWon": 2,
-          "wonAmount": 2400000
+          "second": 2
         },
         {
           "name": "湯浅さん",
+          "oneToOne": 2,
+          "referral": 2,
           "valid": 4,
-          "second": 1,
-          "won": 0,
-          "largeWon": 0,
-          "wonAmount": 0
+          "second": 1
         },
         {
           "name": "丹司さん",
+          "oneToOne": 1,
+          "referral": 1,
           "valid": 2,
-          "second": 1,
-          "won": 0,
-          "largeWon": 0,
-          "wonAmount": 0
+          "second": 1
         }
       ],
       "sample": true
@@ -48,35 +44,31 @@ window.DASHBOARD_DATA = {
       "rows": [
         {
           "name": "田井さん",
+          "oneToOne": 2,
+          "referral": 1,
           "valid": 2,
-          "second": 1,
-          "won": 1,
-          "largeWon": 1,
-          "wonAmount": 1500000
+          "second": 1
         },
         {
           "name": "脇本さん",
+          "oneToOne": 1,
+          "referral": 1,
           "valid": 1,
-          "second": 1,
-          "won": 1,
-          "largeWon": 1,
-          "wonAmount": 1300000
+          "second": 1
         },
         {
           "name": "湯浅さん",
+          "oneToOne": 1,
+          "referral": 1,
           "valid": 2,
-          "second": 0,
-          "won": 0,
-          "largeWon": 0,
-          "wonAmount": 0
+          "second": 0
         },
         {
           "name": "丹司さん",
+          "oneToOne": 0,
+          "referral": 0,
           "valid": 1,
-          "second": 0,
-          "won": 0,
-          "largeWon": 0,
-          "wonAmount": 0
+          "second": 0
         }
       ],
       "sample": true

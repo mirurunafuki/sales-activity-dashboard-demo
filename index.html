@@ -300,7 +300,7 @@
       <div class="wrap topbar">
         <div>
           <h1>営業活動 見える化ダッシュボード</h1>
-          <p class="sub">有効商談から成約までの流れを、週次・月次で前向きに確認するデモ画面</p>
+          <p class="sub">121から商談までの営業活動を、週次・月次で前向きに確認するデモ画面</p>
         </div>
         <div class="actions" aria-label="表示期間">
           <button class="active" type="button" data-period="month">月次</button>
@@ -313,25 +313,25 @@
       <div class="wrap">
         <div class="notice">
           これはサンプルデータのデモです。実運用ではGoogleカレンダーの予定タイトル
-          `【有効】` / `【2次】` / `【成約】` から自動集計します。
+          `【121】` / `【有効紹介】` / `【ヒアリング】` / `【商談】` から自動集計します。
         </div>
 
         <section class="metrics" aria-label="チーム合計">
           <div class="metric">
-            <span>有効商談</span>
+            <span>121</span>
+            <strong id="metric-one-to-one">0</strong>
+          </div>
+          <div class="metric">
+            <span>有効紹介</span>
+            <strong id="metric-referral">0</strong>
+          </div>
+          <div class="metric">
+            <span>ヒアリング</span>
             <strong id="metric-valid">0</strong>
           </div>
           <div class="metric">
-            <span>二次商談</span>
+            <span>商談</span>
             <strong id="metric-second">0</strong>
-          </div>
-          <div class="metric">
-            <span>成約</span>
-            <strong id="metric-won">0</strong>
-          </div>
-          <div class="metric">
-            <span>100万円以上の受注</span>
-            <strong id="metric-large">0</strong>
           </div>
         </section>
 
@@ -342,10 +342,10 @@
               <thead>
                 <tr>
                   <th>メンバー</th>
-                  <th>有効</th>
-                  <th>2次</th>
-                  <th>成約</th>
-                  <th>100万以上</th>
+                  <th>121</th>
+                  <th>有効紹介</th>
+                  <th>ヒアリング</th>
+                  <th>商談</th>
                   <th>次の目安</th>
                 </tr>
               </thead>
@@ -365,16 +365,16 @@
     <script>
       const fallbackData = {
         month: [
-          { name: "田井さん", valid: 12, second: 6, won: 3, largeWon: 2 },
-          { name: "脇本さん", valid: 9, second: 5, won: 2, largeWon: 2 },
-          { name: "湯浅さん", valid: 7, second: 3, won: 1, largeWon: 1 },
-          { name: "丹司さん", valid: 5, second: 2, won: 0, largeWon: 0 }
+          { name: "田井さん", oneToOne: 4, referral: 3, valid: 12, second: 6 },
+          { name: "脇本さん", oneToOne: 3, referral: 2, valid: 9, second: 5 },
+          { name: "湯浅さん", oneToOne: 3, referral: 2, valid: 7, second: 3 },
+          { name: "丹司さん", oneToOne: 2, referral: 1, valid: 5, second: 2 }
         ],
         week: [
-          { name: "田井さん", valid: 3, second: 2, won: 1, largeWon: 1 },
-          { name: "脇本さん", valid: 2, second: 1, won: 1, largeWon: 1 },
-          { name: "湯浅さん", valid: 2, second: 1, won: 0, largeWon: 0 },
-          { name: "丹司さん", valid: 1, second: 0, won: 0, largeWon: 0 }
+          { name: "田井さん", oneToOne: 1, referral: 1, valid: 3, second: 2 },
+          { name: "脇本さん", oneToOne: 1, referral: 1, valid: 2, second: 1 },
+          { name: "湯浅さん", oneToOne: 1, referral: 0, valid: 2, second: 1 },
+          { name: "丹司さん", oneToOne: 0, referral: 0, valid: 1, second: 0 }
         ]
       };
       const dashboardData = window.DASHBOARD_DATA?.periods
@@ -394,15 +394,17 @@
       }
 
       function nextHint(row, period) {
-        if (row.largeWon >= 2) return "良いペース";
-        if (period === "week" && row.valid >= 2) return "2次化を確認";
-        if (row.valid < 3) return "有効商談を追加";
-        if (row.second < 2) return "2次商談化を確認";
-        return "成約見込みを確認";
+        if ((row.oneToOne ?? 0) >= 3 && row.referral >= 2) return "良いペース";
+        if (period === "week" && row.valid >= 2) return "商談化を確認";
+        if ((row.oneToOne ?? 0) < 2) return "121を追加";
+        if (row.referral < 1) return "有効紹介を確認";
+        if (row.valid < 3) return "ヒアリングを追加";
+        if (row.second < 2) return "商談化を確認";
+        return "次の接点を確認";
       }
 
       function achievementBadge(row) {
-        return row.largeWon >= 2
+        return (row.oneToOne ?? 0) >= 3 && row.referral >= 2
           ? '<span class="badge good">目標圏内</span>'
           : '<span class="badge watch">積み上げ中</span>';
       }
@@ -413,20 +415,20 @@
           button.classList.toggle("active", button.dataset.period === period);
         });
 
+        document.getElementById("metric-one-to-one").textContent = total(rows, "oneToOne");
+        document.getElementById("metric-referral").textContent = total(rows, "referral");
         document.getElementById("metric-valid").textContent = total(rows, "valid");
         document.getElementById("metric-second").textContent = total(rows, "second");
-        document.getElementById("metric-won").textContent = total(rows, "won");
-        document.getElementById("metric-large").textContent = total(rows, "largeWon");
 
         document.getElementById("summary-body").innerHTML = rows
           .map(
             (row) => `
               <tr>
                 <td>${row.name}</td>
+                <td>${row.oneToOne ?? 0}</td>
+                <td>${row.referral ?? 0}</td>
                 <td>${row.valid}</td>
                 <td>${row.second}</td>
-                <td>${row.won}</td>
-                <td class="${row.largeWon >= 2 ? "wins" : "risk"}">${row.largeWon}</td>
                 <td>${nextHint(row, period)}</td>
               </tr>
             `
@@ -437,7 +439,6 @@
           .map((row) => {
             const max = Math.max(row.valid, 1);
             const secondRate = Math.round((row.second / max) * 100);
-            const wonRate = Math.round((row.won / max) * 100);
 
             return `
               <article class="member">
@@ -447,19 +448,14 @@
                 </div>
                 <div class="funnel" aria-label="${row.name}の${periodLabels[period]}ファネル">
                   <div class="step">
-                    <span>有効</span>
+                    <span>ヒアリング</span>
                     <div class="bar"><span style="width: 100%"></span></div>
                     <strong>${row.valid}</strong>
                   </div>
                   <div class="step">
-                    <span>2次</span>
+                    <span>商談</span>
                     <div class="bar"><span style="width: ${secondRate}%"></span></div>
                     <strong>${row.second}</strong>
-                  </div>
-                  <div class="step">
-                    <span>成約</span>
-                    <div class="bar"><span style="width: ${wonRate}%"></span></div>
-                    <strong>${row.won}</strong>
                   </div>
                 </div>
                 <p class="hint">${nextHint(row, period)}。今の動きを見ながら、次の一手を決めやすくします。</p>
