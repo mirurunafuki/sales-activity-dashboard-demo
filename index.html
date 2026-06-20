@@ -116,7 +116,7 @@
 
       .metrics {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
         margin-bottom: 16px;
       }
@@ -323,18 +323,14 @@
     <main>
       <div class="wrap">
         <div class="notice">
-          これはサンプルデータのデモです。実運用ではGoogleカレンダーの予定タイトル
-          `【121】` / `【有効紹介】` / `【ヒアリング】` / `【商談】` から自動集計します。
+          実運用ではGoogleカレンダーの予定タイトルに含まれる
+          `121` / `ヒアリング` / `商談` から自動集計します。
         </div>
 
         <section class="metrics" aria-label="チーム合計">
           <div class="metric">
             <span>121</span>
             <strong id="metric-one-to-one">0</strong>
-          </div>
-          <div class="metric">
-            <span>有効紹介</span>
-            <strong id="metric-referral">0</strong>
           </div>
           <div class="metric">
             <span>ヒアリング</span>
@@ -354,7 +350,6 @@
                 <tr>
                   <th>メンバー</th>
                   <th>121</th>
-                  <th>有効紹介</th>
                   <th>ヒアリング</th>
                   <th>商談</th>
                   <th>次の目安</th>
@@ -376,16 +371,16 @@
     <script>
       const fallbackData = {
         month: [
-          { name: "田井さん", oneToOne: 4, referral: 3, valid: 12, second: 6 },
-          { name: "脇本さん", oneToOne: 3, referral: 2, valid: 9, second: 5 },
-          { name: "湯浅さん", oneToOne: 3, referral: 2, valid: 7, second: 3 },
-          { name: "丹司さん", oneToOne: 2, referral: 1, valid: 5, second: 2 }
+          { name: "田井さん", oneToOne: 4, valid: 12, second: 6 },
+          { name: "脇本さん", oneToOne: 3, valid: 9, second: 5 },
+          { name: "湯浅さん", oneToOne: 3, valid: 7, second: 3 },
+          { name: "丹司さん", oneToOne: 2, valid: 5, second: 2 }
         ],
         week: [
-          { name: "田井さん", oneToOne: 1, referral: 1, valid: 3, second: 2 },
-          { name: "脇本さん", oneToOne: 1, referral: 1, valid: 2, second: 1 },
-          { name: "湯浅さん", oneToOne: 1, referral: 0, valid: 2, second: 1 },
-          { name: "丹司さん", oneToOne: 0, referral: 0, valid: 1, second: 0 }
+          { name: "田井さん", oneToOne: 1, valid: 3, second: 2 },
+          { name: "脇本さん", oneToOne: 1, valid: 2, second: 1 },
+          { name: "湯浅さん", oneToOne: 1, valid: 2, second: 1 },
+          { name: "丹司さん", oneToOne: 0, valid: 1, second: 0 }
         ]
       };
 
@@ -433,17 +428,16 @@
       }
 
       function nextHint(row, period) {
-        if ((row.oneToOne ?? 0) >= 3 && row.referral >= 2) return "良いペース";
+        if ((row.oneToOne ?? 0) >= 3 && row.valid >= 3 && row.second >= 2) return "良いペース";
         if (period === "week" && row.valid >= 2) return "商談化を確認";
         if ((row.oneToOne ?? 0) < 2) return "121を追加";
-        if (row.referral < 1) return "有効紹介を確認";
         if (row.valid < 3) return "ヒアリングを追加";
         if (row.second < 2) return "商談化を確認";
         return "次の接点を確認";
       }
 
       function achievementBadge(row) {
-        return (row.oneToOne ?? 0) >= 3 && row.referral >= 2
+        return (row.oneToOne ?? 0) >= 3 && row.valid >= 3 && row.second >= 2
           ? '<span class="badge good">目標圏内</span>'
           : '<span class="badge watch">積み上げ中</span>';
       }
@@ -467,7 +461,6 @@
         });
 
         document.getElementById("metric-one-to-one").textContent = total(rows, "oneToOne");
-        document.getElementById("metric-referral").textContent = total(rows, "referral");
         document.getElementById("metric-valid").textContent = total(rows, "valid");
         document.getElementById("metric-second").textContent = total(rows, "second");
 
@@ -477,7 +470,6 @@
               <tr>
                 <td>${row.name}</td>
                 <td>${row.oneToOne ?? 0}</td>
-                <td>${row.referral ?? 0}</td>
                 <td>${row.valid}</td>
                 <td>${row.second}</td>
                 <td>${nextHint(row, periodType)}</td>
