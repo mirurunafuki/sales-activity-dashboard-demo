@@ -90,6 +90,16 @@
         color: #ffffff;
       }
 
+      select {
+        appearance: none;
+        border: 1px solid var(--line);
+        background: #ffffff;
+        color: var(--ink);
+        border-radius: 6px;
+        padding: 9px 32px 9px 12px;
+        font-weight: 700;
+      }
+
       main {
         padding: 22px 0 40px;
       }
@@ -305,6 +315,7 @@
         <div class="actions" aria-label="表示期間">
           <button class="active" type="button" data-period="month">月次</button>
           <button type="button" data-period="week">週次</button>
+          <select id="period-select" aria-label="対象期間"></select>
         </div>
       </div>
     </header>
@@ -377,16 +388,44 @@
           { name: "丹司さん", oneToOne: 0, referral: 0, valid: 1, second: 0 }
         ]
       };
-      const dashboardData = window.DASHBOARD_DATA?.periods
-        ? {
-            month: window.DASHBOARD_DATA.periods.month.rows,
-            week: window.DASHBOARD_DATA.periods.week.rows
-          }
-        : fallbackData;
 
       const periodLabels = {
         month: "今月",
         week: "今週"
+      };
+
+      function normalizePeriodItems(periodKey) {
+        if (!window.DASHBOARD_DATA?.periods) {
+          return [
+            {
+              label: periodLabels[periodKey],
+              period: periodKey,
+              rows: fallbackData[periodKey],
+              sample: true
+            }
+          ];
+        }
+
+        const pluralKey = periodKey === "month" ? "months" : "weeks";
+        const items = window.DASHBOARD_DATA.periods[pluralKey];
+
+        if (Array.isArray(items) && items.length > 0) return items;
+
+        const period = window.DASHBOARD_DATA.periods[periodKey];
+        return period ? [period] : [];
+      }
+
+      const dashboardData = {
+        month: normalizePeriodItems("month"),
+        week: normalizePeriodItems("week")
+      };
+
+      const state = {
+        periodType: "month",
+        selectedIndex: {
+          month: 0,
+          week: 0
+        }
       };
 
       function total(rows, key) {
@@ -409,10 +448,22 @@
           : '<span class="badge watch">積み上げ中</span>';
       }
 
-      function render(period) {
-        const rows = dashboardData[period];
+      function updatePeriodSelect(periodType) {
+        const select = document.getElementById("period-select");
+        select.innerHTML = dashboardData[periodType]
+          .map((item, index) => `<option value="${index}">${item.label}</option>`)
+          .join("");
+        select.value = String(state.selectedIndex[periodType] ?? 0);
+      }
+
+      function render(periodType) {
+        state.periodType = periodType;
+        const periodItem = dashboardData[periodType][state.selectedIndex[periodType] ?? 0] || dashboardData[periodType][0];
+        const rows = periodItem?.rows || [];
+        updatePeriodSelect(periodType);
+
         document.querySelectorAll("button[data-period]").forEach((button) => {
-          button.classList.toggle("active", button.dataset.period === period);
+          button.classList.toggle("active", button.dataset.period === periodType);
         });
 
         document.getElementById("metric-one-to-one").textContent = total(rows, "oneToOne");
@@ -429,7 +480,7 @@
                 <td>${row.referral ?? 0}</td>
                 <td>${row.valid}</td>
                 <td>${row.second}</td>
-                <td>${nextHint(row, period)}</td>
+                <td>${nextHint(row, periodType)}</td>
               </tr>
             `
           )
@@ -446,7 +497,7 @@
                   <h3>${row.name}</h3>
                   ${achievementBadge(row)}
                 </div>
-                <div class="funnel" aria-label="${row.name}の${periodLabels[period]}ファネル">
+                <div class="funnel" aria-label="${row.name}の${periodItem.label}ファネル">
                   <div class="step">
                     <span>ヒアリング</span>
                     <div class="bar"><span style="width: 100%"></span></div>
@@ -458,7 +509,7 @@
                     <strong>${row.second}</strong>
                   </div>
                 </div>
-                <p class="hint">${nextHint(row, period)}。今の動きを見ながら、次の一手を決めやすくします。</p>
+                <p class="hint">${nextHint(row, periodType)}。今の動きを見ながら、次の一手を決めやすくします。</p>
               </article>
             `;
           })
@@ -467,6 +518,11 @@
 
       document.querySelectorAll("button[data-period]").forEach((button) => {
         button.addEventListener("click", () => render(button.dataset.period));
+      });
+
+      document.getElementById("period-select").addEventListener("change", (event) => {
+        state.selectedIndex[state.periodType] = Number(event.target.value);
+        render(state.periodType);
       });
 
       render("month");
